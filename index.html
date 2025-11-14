@@ -832,6 +832,25 @@
           <button type="submit" class="ask-nova-submit">
             Ask NOVA
           </button>
+          <!-- NOVA Dynamic Fee Display -->
+<div id="nova-fee-box" style="
+  margin-top:8px;
+  padding-top:6px;
+  border-top:1px dashed rgba(148,163,184,0.5);
+  font-size:0.78rem;
+  color:var(--text-muted);
+">
+  <strong>Fee:</strong>
+  <span id="nova-fee">0.010 NOVA (base)</span>
+  <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">
+    Calculated automatically by AI NOVA based on question type and system load.
+  </div>
+</div>
+
+<div class="support-note" id="ask-nova-note">
+  For now this form is in demo mode. Later it can send data directly
+  to an AI support backend or to your email/helpdesk.
+</div>
           <div class="support-note" id="ask-nova-note">
             For now this form is in demo mode. Later it can send data directly
             to an AI support backend or to your email/helpdesk.
@@ -860,6 +879,100 @@
   </footer>
 
   <script>
+    </script>
+
+<!-- 여기 새 스크립트 추가 -->
+<script>
+(function () {
+  function calculateNovaFee() {
+    const categoryEl = document.getElementById("category");
+    const questionEl = document.getElementById("question");
+    const deviceEl   = document.getElementById("device");
+    const fileEl     = document.getElementById("screenshot");
+
+    const category = categoryEl ? categoryEl.value : "";
+    const question = questionEl ? questionEl.value : "";
+    const device   = deviceEl ? deviceEl.value : "";
+    const hasFile  = fileEl && fileEl.files && fileEl.files.length > 0;
+
+    let baseFee = 0.01;
+    let fee = baseFee;
+    let mode = "AI Dynamic Fee";
+
+    // 1) 매우 간단한 질문 + 카테고리 미선택 → 무료 보호 모드
+    if (!category && question.length <= 120 && !hasFile) {
+      fee = 0.0;
+      mode = "Free (User Protection Mode)";
+      updateFeeDisplay(fee, mode);
+      return;
+    }
+
+    // 2) 질문 길이에 따른 추가 부하
+    if (question.length > 200) fee += 0.005;
+    if (question.length > 500) fee += 0.005;
+
+    // 3) 카테고리별 부하
+    if (category === "installation" || category === "wallet") {
+      fee += 0.003;
+    }
+    if (category === "auto-trading" || category === "mining") {
+      fee += 0.005;
+    }
+
+    // 4) 파일(스크린샷) 첨부 시 부하 증가
+    if (hasFile) {
+      fee += 0.005;
+    }
+
+    // 5) 시스템 부하(랜덤 시뮬레이션) – 나중에 실제 서버 상태로 교체 가능
+    const randomLoad = Math.random(); // 0 ~ 1
+
+    if (randomLoad > 0.85) {
+      fee += 0.01;        // 매우 혼잡
+      mode = "High Load";
+    } else if (randomLoad > 0.65) {
+      fee += 0.005;       // 중간 혼잡
+      mode = "Normal Load";
+    } else {
+      mode = "Low Load";
+    }
+
+    // 상한선
+    if (fee > 0.03) fee = 0.03;
+
+    updateFeeDisplay(fee, mode);
+  }
+
+  function updateFeeDisplay(fee, mode) {
+    const el = document.getElementById("nova-fee");
+    if (!el) return;
+
+    const formatted = fee.toFixed(3);
+    el.innerHTML = formatted + " NOVA" +
+      ' <span style="opacity:0.7">(' + mode + ')</span>';
+  }
+
+  // 입력 변화에 따라 자동 계산
+  function attachListeners() {
+    const categoryEl = document.getElementById("category");
+    const questionEl = document.getElementById("question");
+    const deviceEl   = document.getElementById("device");
+    const fileEl     = document.getElementById("screenshot");
+
+    if (categoryEl) categoryEl.addEventListener("change", calculateNovaFee);
+    if (questionEl) questionEl.addEventListener("input", calculateNovaFee);
+    if (deviceEl)   deviceEl.addEventListener("change", calculateNovaFee);
+    if (fileEl)     fileEl.addEventListener("change", calculateNovaFee);
+  }
+
+  attachListeners();
+  calculateNovaFee();
+})();
+</script>
+
+</body>
+</html>
+
     // ================= 공통 유틸 =================
     function scrollToSection(id) {
       const el = document.getElementById(id);
@@ -1012,5 +1125,29 @@
       }
     })();
   </script>
+<script>
+// NOVA Dynamic Fee Engine
+(function () {
+    const feeBox = document.getElementById("nova-fee");
+    if (!feeBox) return;
+
+    function randomFee(min, max) {
+        return (Math.random() * (max - min) + min).toFixed(3);
+    }
+
+    function updateFee() {
+        const base = 0.010; // 기본 수수료
+        const load = randomFee(0.000, 0.005); // 추가 수수료 (시스템 부하)
+        const finalFee = (base + parseFloat(load)).toFixed(3);
+
+        feeBox.textContent = `${finalFee} NOVA`;
+    }
+
+    updateFee();
+    setInterval(updateFee, 10000); // 10초마다 업데이트
+})();
+</script>
+
 </body>
 </html>
+
