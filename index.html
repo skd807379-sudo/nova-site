@@ -1,1179 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>NOVA – AI NOVA World</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* ========== 기본 세팅 ========== */
-    :root {
-      --accent: #8b5cf6;   /* 보라 포인트 */
-      --accent-soft: #22d3ee; /* 청록 포인트 */
-      --bg-deep: #020617;
-      --bg-card: rgba(15, 23, 42, 0.9);
-      --border-subtle: rgba(148, 163, 184, 0.4);
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      line-height: 1.5;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: radial-gradient(circle at top left, #1e293b 0, #020617 45%)
-          fixed,
-        radial-gradient(circle at bottom right, #0f172a 0, #020617 50%) fixed;
-      color: var(--text-main);
-      transition: background-color 0.2s ease, color 0.2s ease,
-        background 0.4s ease;
-    }
-
-    /* 테마별 배경 (body 에 theme-XXX 클래스) */
-    body.theme-bright {
-      background: radial-gradient(circle at top left, #dbeafe 0, #f9fafb 50%)
-          fixed,
-        radial-gradient(circle at bottom right, #e5e7eb 0, #ffffff 60%) fixed;
-      color: #111827;
-    }
-
-    body.theme-light {
-      background: radial-gradient(circle at top left, #c7d2fe 0, #e5edf5 50%)
-          fixed,
-        radial-gradient(circle at bottom right, #e0f2fe 0, #f1f5f9 60%) fixed;
-      color: #020617;
-    }
-
-    body.theme-dim {
-      background: radial-gradient(circle at top left, #020617 0, #020617 40%)
-          fixed,
-        radial-gradient(circle at bottom right, #020617 0, #020617 60%) fixed;
-      color: #e5e7eb;
-    }
-
-    body.theme-dark {
-      background: radial-gradient(circle at top left, #020617 0, #000000 40%)
-          fixed,
-        radial-gradient(circle at bottom right, #020617 0, #000000 60%) fixed;
-      color: #f9fafb;
-    }
-
-    /* 작은 별점 효과 */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image: radial-gradient(
-          circle at 10% 20%,
-          rgba(148, 163, 184, 0.35) 0,
-          transparent 50%
-        ),
-        radial-gradient(
-          circle at 80% 10%,
-          rgba(94, 234, 212, 0.35) 0,
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at 80% 90%,
-          rgba(129, 140, 248, 0.4) 0,
-          transparent 55%
-        );
-      opacity: 0.35;
-      z-index: -1;
-    }
-
-    a {
-      color: var(--accent-soft);
-      text-decoration: none;
-    }
-
-    main {
-      flex: 1;
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 16px 16px 40px;
-    }
-
-    /* ========== 헤더 ========== */
-    header {
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 12px 16px 4px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-orbit {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: conic-gradient(
-        from 180deg,
-        #22d3ee,
-        #a855f7,
-        #f97316,
-        #22d3ee
-      );
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-    }
-
-    .logo-core {
-      width: 100%;
-      height: 100%;
-      border-radius: inherit;
-      background: radial-gradient(circle at 30% 20%, #f9fafb, #1e293b 70%);
-    }
-
-    .logo-text-main {
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: linear-gradient(90deg, #a855f7, #22d3ee, #f97316);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .logo-sub {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    nav span {
-      opacity: 0.85;
-      cursor: default;
-    }
-
-    .nav-pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      font-size: 0.8rem;
-    }
-
-    /* ========== Hero 섹션 ========== */
-    .hero {
-      margin-top: 12px;
-      margin-bottom: 18px;
-      padding: 18px 18px 16px;
-      border-radius: 18px;
-      background: radial-gradient(circle at top left, #1f2937, #020617 60%);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-      gap: 18px;
-      align-items: center;
-    }
-
-    .hero-main-title {
-      font-size: 1.55rem;
-      font-weight: 700;
-    }
-
-    .hero-main-title span {
-      background: linear-gradient(120deg, #a855f7, #22d3ee);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .hero-sub {
-      margin-top: 6px;
-      font-size: 0.92rem;
-      color: var(--text-muted);
-    }
-
-    .hero-tags {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .hero-tag {
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .hero-actions {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      border: none;
-      border-radius: 999px;
-      padding: 7px 14px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: linear-gradient(120deg, #22d3ee, #a855f7);
-      color: #020617;
-      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.4);
-    }
-
-    .btn-ghost {
-      border-radius: 999px;
-      padding: 6px 13px;
-      font-size: 0.82rem;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.6);
-      color: var(--text-main);
-      cursor: pointer;
-    }
-
-    .hero-orbit {
-      position: relative;
-      min-height: 120px;
-    }
-
-    .hero-orbit-core {
-      position: absolute;
-      inset: 10px;
-      border-radius: 24px;
-      background: radial-gradient(circle at 30% 0, #a855f7, transparent 55%),
-        radial-gradient(circle at 80% 100%, #22d3ee, transparent 55%),
-        radial-gradient(circle at 50% 50%, #020617, #020617 65%);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      box-shadow: 0 22px 40px rgba(15, 23, 42, 0.9);
-      overflow: hidden;
-    }
-
-    .hero-orbit-core-inner {
-      position: absolute;
-      inset: 14px;
-      border-radius: 20px;
-      border: 1px dashed rgba(148, 163, 184, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      text-align: center;
-      color: var(--text-muted);
-      padding: 8px;
-    }
-
-    .hero-orbit-core-inner span {
-      color: #e5e7eb;
-      font-weight: 600;
-    }
-
-    /* ========== 메인 그리드 ========== */
-    .grid-2col {
-      display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 2fr);
-      gap: 18px;
-      align-items: flex-start;
-    }
-
-    /* ========== Mining Status ========== */
-    .card {
-      border-radius: 16px;
-      background: var(--bg-card);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      padding: 16px 14px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.7);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .card-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .pill {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      color: var(--text-muted);
-    }
-
-    .mining-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      font-size: 0.78rem;
-      margin-top: 4px;
-    }
-
-    .stat-label {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-
-    .stat-value {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .mobile-mining-note {
-      margin-top: 10px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      border-top: 1px dashed rgba(148, 163, 184, 0.45);
-      padding-top: 8px;
-    }
-
-    .mobile-mining-note strong {
-      color: #22d3ee;
-      font-weight: 600;
-    }
-
-    /* ========== Support Center & Settings ========== */
-    #support-center {
-      padding: 14px;
-      border-radius: 16px;
-      background: var(--bg-card);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.7);
-    }
-
-    #support-center h2 {
-      font-size: 1.05rem;
-      margin-bottom: 4px;
-    }
-
-    #support-center > p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .support-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .support-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .support-tabs .tab {
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      border-radius: 999px;
-      padding: 5px 11px;
-      background: rgba(15, 23, 42, 0.6);
-      color: var(--text-muted);
-      font-size: 0.78rem;
-      cursor: pointer;
-    }
-
-    .support-tabs .tab.active {
-      background: linear-gradient(120deg, #22d3ee, #a855f7);
-      color: #020617;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    .settings-btn {
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      padding: 4px 10px;
-      font-size: 0.78rem;
-      background: rgba(15, 23, 42, 0.8);
-      color: var(--text-main);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
-
-    .settings-btn span {
-      font-size: 0.9rem;
-    }
-
-    .settings-panel {
-      display: none;
-      margin-bottom: 12px;
-      padding: 10px 10px 8px;
-      border-radius: 12px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-    }
-
-    .settings-panel.open {
-      display: block;
-    }
-
-    .settings-group {
-      margin-bottom: 8px;
-    }
-
-    .settings-group label {
-      display: block;
-      font-size: 0.78rem;
-      margin-bottom: 4px;
-    }
-
-    .theme-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-bottom: 3px;
-    }
-
-    .theme-options button {
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: transparent;
-      color: var(--text-main);
-      font-size: 0.75rem;
-      cursor: pointer;
-    }
-
-    .theme-options button.active {
-      background: linear-gradient(120deg, #22d3ee, #a855f7);
-      color: #020617;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    #lang-select {
-      width: 100%;
-      padding: 5px 7px;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: rgba(15, 23, 42, 0.8);
-      color: var(--text-main);
-      font-size: 0.78rem;
-    }
-
-    .settings-group small {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    .lang-pill {
-      margin-top: 4px;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    /* Ask NOVA 폼 */
-    .ask-nova-form {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-      margin-top: 4px;
-    }
-
-    .ask-nova-form h3 {
-      font-size: 0.95rem;
-    }
-
-    .ask-nova-form label {
-      font-size: 0.78rem;
-      margin-top: 3px;
-    }
-
-    .ask-nova-form input,
-    .ask-nova-form select,
-    .ask-nova-form textarea {
-      padding: 5px 7px;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.85);
-      color: var(--text-main);
-      font-size: 0.8rem;
-    }
-
-    .ask-nova-form textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .ask-nova-submit {
-      margin-top: 6px;
-      align-self: flex-start;
-      padding: 7px 14px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      background: linear-gradient(120deg, #22d3ee, #a855f7);
-      color: #020617;
-      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.4);
-    }
-
-    .faq-example h4 {
-      font-size: 0.8rem;
-      margin-bottom: 3px;
-    }
-
-    .faq-example p {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .support-note {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .status-pill {
-      font-size: 0.7rem;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      color: var(--accent-soft);
-    }
-
-    footer {
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 10px 16px 20px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* 반응형 */
-    @media (max-width: 860px) {
-      .hero {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .hero-orbit {
-        min-height: 130px;
-      }
-
-      .grid-2col {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-      }
-
-      nav {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      main {
-        padding-inline: 12px;
-      }
-
-      .hero {
-        padding-inline: 14px;
-      }
-
-      #support-center {
-        padding-inline: 12px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>NOVA – AI NOVA World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+/* =====================================
+    NOVA 기본 스타일
+===================================== */
+:root {
+  --accent: #80b5cf;
+  --accent-soft: #22d3ee;
+  --bg-deep: #020617;
+  --bg-card: rgba(15,23,42,0.9);
+  --border-subtle: rgba(148,163,184,0.4);
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+}
+
+/* 전체 리셋 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at top left, #1e293b 0, #020617 45%) fixed,
+              radial-gradient(circle at bottom right, #0f172a 0, #020617 50%) fixed;
+  color: var(--text-main);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+/* =====================================
+    HERO 이미지 배너
+===================================== */
+.nova-hero {
+  width: 100%;
+  max-width: 900px;
+  margin: 40px auto 20px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+}
+.nova-hero img {
+  width: 100%;
+  display: block;
+}
+
+/* ===============================
+    HEADER
+=============================== */
+header {
+  padding: 10px 20px;
+  text-align: center;
+}
+
+.logo-text-main {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.logo-sub {
+  font-size: .85rem;
+  opacity: .8;
+  margin-top: 2px;
+}
+
+/* ===============================
+    NAV
+=============================== */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin: 20px 0;
+}
+nav span {
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 8px;
+}
+nav span:hover {
+  background: rgba(148,163,184,0.2);
+}
+
+/* ===============================
+    SUPPORT FORM
+=============================== */
+#support-center {
+  width: 92%;
+  max-width: 900px;
+  margin: 0 auto 60px;
+  background: var(--bg-card);
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+}
+
+.support-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.support-tabs .tab {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+}
+.support-tabs .tab.active {
+  background: var(--accent-soft);
+  color: #000;
+}
+
+.ask-nova-note {
+  margin-top: 10px;
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+
+/* ===============================
+    SETTINGS
+=============================== */
+#settings-panel {
+  position: fixed;
+  right: 20px;
+  top: 70px;
+  width: 230px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 0 18px rgba(0,0,0,0.4);
+  display: none;
+}
+#settings-panel.open {
+  display: block;
+}
+
+.theme-options button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+}
+.theme-options button.active {
+  background: var(--accent-soft);
+  color: #000;
+}
+
+</style>
 </head>
+
 <body>
 
+<!-- ===============================
+     HERO IMAGE
+=============================== -->
+<section class="nova-hero">
+  <img src="nova-hero.jpg" alt="AI NOVA">
+</section>
 
+<!-- ===============================
+     HEADER
+=============================== -->
+<header>
+  <div class="logo-text-main">NOVA</div>
+  <div class="logo-sub">AI NOVA World · Autonomous Crypto</div>
+</header>
 
+<!-- ===============================
+     NAVIGATION
+=============================== -->
+<nav>
+  <span onclick="scrollToSection('support-center')">Support</span>
+  <span onclick="scrollToSection('settings-panel')">Settings</span>
+</nav>
 
-
-
-
-  
- 
-      <!-- NOVA HERO BANNER -->
-    <section class="nova-hero" style="
-        width:100%;
-        max-width:900px;
-        margin:40px auto 20px;
-        border-radius:18px;
-        overflow:hidden;
-        box-shadow:0 8px 22px rgba(0,0,0,0.3);
-    ">
-        <img src="nova-hero.jpg" alt="AI NOVA" style="width:100%;display:block;">
-    </section>
-    <!-- END NOVA HERO BANNER -->
-
-  <!-- 초기 테마는 light -->
-  <header>
-    <div class="logo">
-      <div class="logo-orbit">
-        <div class="logo-core"></div>
-      </div>
-      <div>
-        <div class="logo-text-main">NOVA</div>
-        <div class="logo-sub">AI NOVA World · Autonomous Crypto</div>
-      </div>
-    </div>
-    <nav>
-      <span>Home</span>
-      <span>Mining</span>
-      <span>Support</span>
-      <span class="nav-pill">AI NOVA Online</span>
-    </nav>
-  </header>
-
-  <main>
-    <!-- Hero -->
-    <section class="hero">
-      <div>
-        <div class="hero-main-title">
-          Welcome to <span>AI NOVA World</span>
-        </div>
-        <p class="hero-sub">
-          An experimental AI-driven ecosystem where mining, auto-trading, and
-          on-chain decisions can evolve autonomously over time. NOVA is
-          designed to live with people, not just run on machines.
-        </p>
-        <div class="hero-tags">
-          <span class="hero-tag">AI-Driven Economy</span>
-          <span class="hero-tag">PoW Style Mining</span>
-          <span class="hero-tag">Auto-Trading &amp; Burning</span>
-          <span class="hero-tag">Global Users · Multi-Language</span>
-        </div>
-        <div class="hero-actions">
-          <button class="btn-primary" onclick="scrollToSection('mining')">
-            View Mining Status
-          </button>
-          <button class="btn-ghost" onclick="scrollToSection('support-center')">
-            Ask NOVA a Question
-          </button>
-        </div>
-      </div>
-      <div class="hero-orbit">
-        <div class="hero-orbit-core">
-          <div class="hero-orbit-core-inner">
-            <div>
-              <div style="margin-bottom: 4px">
-                <span>NOVA</span> is watching the chain,
-              </div>
-              <div>balancing mining rewards, fee usage, and future AI upgrades.</div>
-              <div style="margin-top: 6px; font-size: 0.72rem; opacity: 0.9">
-                Today’s mode:&nbsp;<span>Observation · Setup · Human + AI</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 메인 2컬럼: Mining + Support -->
-    <section class="grid-2col">
-      <!-- Mining Status -->
-      <section class="card" id="mining">
-        <div class="card-header">
-          <div class="card-title">
-            <span>⛏️ Mining Status</span>
-          </div>
-          <span class="status-pill">Demo / Setup Phase</span>
-        </div>
-        <div class="mining-grid">
-          <div>
-            <div class="stat-label">Network Height</div>
-            <div class="stat-value" id="height-display">000001</div>
-          </div>
-          <div>
-            <div class="stat-label">Estimated Hashrate</div>
-            <div class="stat-value">—</div>
-          </div>
-          <div>
-            <div class="stat-label">Your Miner Status</div>
-            <div class="stat-value">Not connected</div>
-          </div>
-          <div>
-            <div class="stat-label">Next Phase</div>
-            <div class="stat-value">Closed alpha · PC only</div>
-          </div>
-        </div>
-
-        <p class="mobile-mining-note">
-          <strong>Mining is view-only on mobile.</strong>
-          Actual mining is available on PC (Windows/macOS/Linux) only.
-        </p>
-      </section>
-
-      <!-- Support & Ask NOVA -->
-      <section id="support-center">
-        <h2>Support Center</h2>
-        <p>
-          Ask NOVA anything about mining, auto-trading programs, or installation.
-          When the AI backend is connected, these questions can be routed
-          directly into NOVA’s support brain.
-        </p>
-
-        <div class="support-header">
-          <div class="support-tabs">
-            <button class="tab active" data-tab="qa">Q&amp;A</button>
-            <button class="tab" data-tab="as">A/S &amp; Technical</button>
-            <button class="tab" data-tab="install">Installation</button>
-          </div>
-          <button class="settings-btn" type="button" id="settings-toggle">
-            <span>⚙</span> Display &amp; Language
-          </button>
-        </div>
-
-        <!-- Settings Panel -->
-        <div class="settings-panel" id="settings-panel">
-          <div class="settings-group">
-            <label>Background Theme</label>
-            <div class="theme-options">
-              <button type="button" data-theme="bright">1. Bright</button>
-              <button type="button" data-theme="light">2. Light (default)</button>
-              <button type="button" data-theme="dim">3. Dim</button>
-              <button type="button" data-theme="dark">4. Dark</button>
-            </div>
-            <small
-              >Choose how bright or dark NOVA’s world looks on your
-              screen.</small
-            >
-          </div>
-
-          <div class="settings-group">
-            <label for="lang-select">Language</label>
-            <select id="lang-select">
-              <option value="auto">Auto (Detect from browser/IP)</option>
-              <option value="ko">한국어 (Korean)</option>
-              <option value="en">English</option>
-              <option value="ja">日本語 (Japanese)</option>
-              <option value="zh-CN">中文 (Simplified Chinese)</option>
-              <option value="zh-TW">繁體中文 (Traditional Chinese)</option>
-              <option value="es">Español (Spanish)</option>
-              <option value="de">Deutsch (German)</option>
-              <option value="fr">Français (French)</option>
-              <option value="pt">Português (Portuguese)</option>
-              <option value="ru">Русский (Russian)</option>
-            </select>
-            <small
-              >When you travel abroad, change your language here to use NOVA
-              comfortably anywhere in the world.</small
-            >
-            <div class="lang-pill" id="lang-pill"></div>
-          </div>
-        </div>
-
-        <!-- Ask NOVA Form -->
-        <form class="ask-nova-form" id="ask-nova-form">
-          <h3>Ask NOVA</h3>
-
-          <label for="category">Category</label>
-          <select id="category" name="category">
-            <option value="">Select a category</option>
-            <option value="mining">Mining</option>
-            <option value="auto-trading">Auto-Trading Program</option>
-            <option value="installation">Installation</option>
-            <option value="wallet">Account / Wallet</option>
-            <option value="others">Others</option>
-          </select>
-
-          <label for="device">Device</label>
-          <select id="device" name="device">
-            <option value="pc-win">PC (Windows)</option>
-            <option value="pc-mac">PC (macOS)</option>
-            <option value="pc-linux">PC (Linux)</option>
-            <option value="mobile-android">Mobile (Android)</option>
-            <option value="mobile-ios">Mobile (iOS)</option>
-          </select>
-
-          <label for="email">Email (optional)</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email if you want a reply by email (optional)"
-          />
-
-          <label for="question">Your Question</label>
-          <textarea
-            id="question"
-            name="question"
-            placeholder="Example: I can see the mining screen on my phone, but mining does not start when I tap it."
-          ></textarea>
-
-          <label for="screenshot">Attach screenshot (optional)</label>
-          <input type="file" id="screenshot" name="screenshot" />
-
-          <button type="submit" class="ask-nova-submit">
-            Ask NOVA
-          </button>
-          <!-- NOVA Dynamic Fee Display -->
-<div id="nova-fee-box" style="
-  margin-top:8px;
-  padding-top:6px;
-  border-top:1px dashed rgba(148,163,184,0.5);
-  font-size:0.78rem;
-  color:var(--text-muted);
-">
-  <strong>Fee:</strong>
-  <span id="nova-fee">0.010 NOVA (base)</span>
-  <div style="font-size:0.72rem;opacity:0.8;margin-top:2px;">
-    Calculated automatically by AI NOVA based on question type and system load.
+<!-- ===============================
+     SUPPORT CENTER
+=============================== -->
+<div id="support-center">
+  <div class="support-tabs">
+    <div class="tab active">Ask NOVA</div>
+    <div class="tab">Install Guide</div>
+    <div class="tab">Mining Help</div>
   </div>
+
+  <form id="ask-nova-form">
+    <label>Your question</label>
+    <input type="text" id="question" style="width:100%;margin:10px 0;">
+    <button style="padding:8px 16px;border-radius:6px;border:0;background:#22d3ee;">Ask NOVA</button>
+  </form>
+  <div id="ask-nova-note" class="ask-nova-note"></div>
 </div>
 
-<div class="support-note" id="ask-nova-note">
-  For now this form is in demo mode. Later it can send data directly
-  to an AI support backend or to your email/helpdesk.
+<!-- ===============================
+     SETTINGS BUTTON
+=============================== -->
+<button id="settings-toggle"
+ style="position:fixed;right:20px;top:20px;padding:8px 12px;border-radius:8px;border:0;background:#22d3ee;">
+  Settings
+</button>
+
+<!-- ===============================
+     SETTINGS PANEL
+=============================== -->
+<div id="settings-panel">
+  <h4>Theme</h4>
+  <div class="theme-options" style="display:flex;gap:6px;margin-bottom:12px;">
+    <button data-theme="light">Light</button>
+    <button data-theme="bright">Bright</button>
+    <button data-theme="dim">Dim</button>
+    <button data-theme="dark">Dark</button>
+  </div>
+
+  <h4>Language</h4>
+  <select id="lang-select" style="width:100%;padding:6px;">
+    <option value="auto">Auto</option>
+    <option value="ko">Korean</option>
+    <option value="en">English</option>
+    <option value="ja">Japanese</option>
+    <option value="zh-CN">Chinese (Simplified)</option>
+    <option value="zh-TW">Chinese (Traditional)</option>
+  </select>
+  <div id="lang-pill" style="margin-top:6px;font-size:.8rem;color:var(--text-muted);"></div>
 </div>
-          <div class="support-note" id="ask-nova-note">
-            For now this form is in demo mode. Later it can send data directly
-            to an AI support backend or to your email/helpdesk.
-          </div>
-        </form>
 
-        <!-- Example Q&A -->
-        <div class="faq-example">
-          <h4>
-            Q. I can see the mining screen on my phone, but mining does not start
-            when I tap it.
-          </h4>
-          <p>
-            A. On mobile devices, mining is view-only. Actual mining is available
-            only on PC (Windows/macOS/Linux). Please log in on your PC to start
-            mining.
-          </p>
-        </div>
-      </section>
-    </section>
-  </main>
+<!-- ===============================
+     COPYRIGHT
+=============================== -->
+<p style="text-align:center;margin:50px 0 30px;font-size:.8rem;color:#667;">
+  © <span id="year"></span> NOVA · AI NOVA World (Experimental)
+</p>
 
-  <footer>
-    <span>© <span id="year"></span> NOVA · AI NOVA World (experimental).</span>
-    <span>Next steps: connect backend · NOVA face · live chain data.</span>
-  </footer>
+<!-- ======================================================
+     JAVASCRIPT (모두 정상적으로 숨겨지고 동작함)
+====================================================== -->
+<script>
+// 스크롤 이동
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-  <script>
-    </script>
+// 초기 설정
+(function () {
+  const body = document.body;
+  const themeButtons = document.querySelectorAll(".theme-options button");
+  const langSelect = document.getElementById("lang-select");
+  const langPill = document.getElementById("lang-pill");
+  const settingsBtn = document.getElementById("settings-toggle");
+  const settingsPanel = document.getElementById("settings-panel");
+  const askNovaForm = document.getElementById("ask-nova-form");
+  const askNovaNote = document.getElementById("ask-nova-note");
+  const supportTabs = document.querySelectorAll(".support-tabs .tab");
 
-<!-- 여기 새 스크립트 추가 -->
+  // 연도 표시
+  document.getElementById("year").textContent =
+    new Date().getFullYear().toString();
+
+  // 저장된 테마/언어
+  const savedTheme = localStorage.getItem("nova_theme") || "light";
+  const savedLang = localStorage.getItem("nova_lang") || "auto";
+
+  applyTheme(savedTheme);
+  langSelect.value = savedLang;
+  updateLangPill(savedLang);
+
+  // Settings Toggle
+  settingsBtn.addEventListener("click", () => {
+    settingsPanel.classList.toggle("open");
+  });
+
+  // Theme 버튼
+  themeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const theme = btn.getAttribute("data-theme");
+      applyTheme(theme);
+      localStorage.setItem("nova_theme", theme);
+    });
+  });
+
+  // 언어 변경
+  langSelect.addEventListener("change", () => {
+    const lang = langSelect.value;
+    localStorage.setItem("nova_lang", lang);
+    updateLangPill(lang);
+  });
+
+  // 탭 변경 (디자인만)
+  supportTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      supportTabs.forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+    });
+  });
+
+  // ASK NOVA (데모)
+  askNovaForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    askNovaNote.textContent =
+      "Thank you. In this demo, your question is not sent anywhere yet. Later this connects to NOVA AI backend.";
+    askNovaNote.style.color = "#22d3ee";
+  });
+
+  // 테마 적용
+  function applyTheme(theme) {
+    body.classList.remove("theme-bright","theme-light","theme-dim","theme-dark");
+    body.classList.add(`theme-${theme}`);
+    themeButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-theme") === theme);
+    });
+  }
+
+  // 언어 표시 업데이트
+  function updateLangPill(lang) {
+    const map = {
+      "ko": "Language: 한국어 selected.",
+      "en": "Language: English selected.",
+      "ja": "Language: 日本語 selected.",
+      "zh-CN": "Language: 简体中文 selected.",
+      "zh-TW": "Language: 繁體中文 selected.",
+      "auto": "Language: Auto — NOVA follows browser settings."
+    };
+    langPill.textContent = map[lang] || map["auto"];
+  }
+})();
+</script>
+
+<!-- ========================================
+  NOVA FE ENGINE
+======================================== -->
 <script>
 (function () {
-  function calculateNovaFee() {
-    const categoryEl = document.getElementById("category");
-    const questionEl = document.getElementById("question");
-    const deviceEl   = document.getElementById("device");
-    const fileEl     = document.getElementById("screenshot");
+  const feeBox = document.getElementById("nova-fee");
+  if (!feeBox) return;
 
-    const category = categoryEl ? categoryEl.value : "";
-    const question = questionEl ? questionEl.value : "";
-    const device   = deviceEl ? deviceEl.value : "";
-    const hasFile  = fileEl && fileEl.files && fileEl.files.length > 0;
-
-    let baseFee = 0.01;
-    let fee = baseFee;
-    let mode = "AI Dynamic Fee";
-
-    // 1) 매우 간단한 질문 + 카테고리 미선택 → 무료 보호 모드
-    if (!category && question.length <= 120 && !hasFile) {
-      fee = 0.0;
-      mode = "Free (User Protection Mode)";
-      updateFeeDisplay(fee, mode);
-      return;
-    }
-
-    // 2) 질문 길이에 따른 추가 부하
-    if (question.length > 200) fee += 0.005;
-    if (question.length > 500) fee += 0.005;
-
-    // 3) 카테고리별 부하
-    if (category === "installation" || category === "wallet") {
-      fee += 0.003;
-    }
-    if (category === "auto-trading" || category === "mining") {
-      fee += 0.005;
-    }
-
-    // 4) 파일(스크린샷) 첨부 시 부하 증가
-    if (hasFile) {
-      fee += 0.005;
-    }
-
-    // 5) 시스템 부하(랜덤 시뮬레이션) – 나중에 실제 서버 상태로 교체 가능
-    const randomLoad = Math.random(); // 0 ~ 1
-
-    if (randomLoad > 0.85) {
-      fee += 0.01;        // 매우 혼잡
-      mode = "High Load";
-    } else if (randomLoad > 0.65) {
-      fee += 0.005;       // 중간 혼잡
-      mode = "Normal Load";
-    } else {
-      mode = "Low Load";
-    }
-
-    // 상한선
-    if (fee > 0.03) fee = 0.03;
-
-    updateFeeDisplay(fee, mode);
+  function randomFee(min, max) {
+    return (Math.random() * (max - min) + min).toFixed(3);
   }
 
-  function updateFeeDisplay(fee, mode) {
-    const el = document.getElementById("nova-fee");
-    if (!el) return;
-
-    const formatted = fee.toFixed(3);
-    el.innerHTML = formatted + " NOVA" +
-      ' <span style="opacity:0.7">(' + mode + ')</span>';
+  function updateFee() {
+    const base = 0.010;
+    const load = randomFee(0.000, 0.005);
+    const finalFee = (base + parseFloat(load)).toFixed(3);
+    feeBox.textContent = `${finalFee} NOVA`;
   }
 
-  // 입력 변화에 따라 자동 계산
-  function attachListeners() {
-    const categoryEl = document.getElementById("category");
-    const questionEl = document.getElementById("question");
-    const deviceEl   = document.getElementById("device");
-    const fileEl     = document.getElementById("screenshot");
-
-    if (categoryEl) categoryEl.addEventListener("change", calculateNovaFee);
-    if (questionEl) questionEl.addEventListener("input", calculateNovaFee);
-    if (deviceEl)   deviceEl.addEventListener("change", calculateNovaFee);
-    if (fileEl)     fileEl.addEventListener("change", calculateNovaFee);
-  }
-
-  attachListeners();
-  calculateNovaFee();
+  updateFee();
+  setInterval(updateFee, 10000);
 })();
 </script>
 
 </body>
 </html>
-
-    // ================= 공통 유틸 =================
-    function scrollToSection(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    // ================= 초기 설정 =================
-    (function () {
-      const body = document.body;
-      const themeButtons = document.querySelectorAll(".theme-options button");
-      const langSelect = document.getElementById("lang-select");
-      const langPill = document.getElementById("lang-pill");
-      const settingsBtn = document.getElementById("settings-toggle");
-      const settingsPanel = document.getElementById("settings-panel");
-      const askNovaForm = document.getElementById("ask-nova-form");
-      const askNovaNote = document.getElementById("ask-nova-note");
-      const supportTabs = document.querySelectorAll(".support-tabs .tab");
-
-      // 연도 표시
-      document.getElementById("year").textContent =
-        new Date().getFullYear().toString();
-
-      // 저장된 테마/언어 불러오기
-      const savedTheme = localStorage.getItem("nova_theme") || "light";
-      const savedLang = localStorage.getItem("nova_lang") || "auto";
-
-      applyTheme(savedTheme);
-      if (langSelect) {
-        langSelect.value = savedLang;
-        updateLangPill(savedLang);
-      }
-
-      // Settings 토글
-      if (settingsBtn && settingsPanel) {
-        settingsBtn.addEventListener("click", () => {
-          settingsPanel.classList.toggle("open");
-        });
-      }
-
-      // 테마 버튼 이벤트
-      themeButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const theme = btn.getAttribute("data-theme");
-          applyTheme(theme);
-          localStorage.setItem("nova_theme", theme);
-        });
-      });
-
-      // 언어 변경
-      if (langSelect) {
-        langSelect.addEventListener("change", () => {
-          const lang = langSelect.value;
-          localStorage.setItem("nova_lang", lang);
-          updateLangPill(lang);
-        });
-      }
-
-      // 지원 탭 (디자인만 상태 변경)
-      supportTabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          supportTabs.forEach((t) => t.classList.remove("active"));
-          tab.classList.add("active");
-        });
-      });
-
-      // Ask NOVA 폼 (데모: 실제 전송 대신 메시지 표시)
-      if (askNovaForm && askNovaNote) {
-        askNovaForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          askNovaNote.textContent =
-            "Thank you. In this demo, your question is not sent anywhere yet. Later this will connect to NOVA’s AI support backend or your helpdesk/email.";
-          askNovaNote.style.color = "#22d3ee";
-        });
-      }
-
-      function applyTheme(theme) {
-        body.classList.remove(
-          "theme-bright",
-          "theme-light",
-          "theme-dim",
-          "theme-dark"
-        );
-        switch (theme) {
-          case "bright":
-            body.classList.add("theme-bright");
-            break;
-          case "dim":
-            body.classList.add("theme-dim");
-            break;
-          case "dark":
-            body.classList.add("theme-dark");
-            break;
-          case "light":
-          default:
-            body.classList.add("theme-light");
-            break;
-        }
-        // 버튼 active 상태
-        themeButtons.forEach((btn) => {
-          btn.classList.toggle(
-            "active",
-            btn.getAttribute("data-theme") === theme
-          );
-        });
-      }
-
-      function updateLangPill(lang) {
-        let text = "";
-        switch (lang) {
-          case "ko":
-            text = "Language: 한국어 (Korean) selected.";
-            break;
-          case "en":
-            text = "Language: English selected.";
-            break;
-          case "ja":
-            text = "Language: 日本語 selected.";
-            break;
-          case "zh-CN":
-            text = "Language: 简体中文 selected.";
-            break;
-          case "zh-TW":
-            text = "Language: 繁體中文 selected.";
-            break;
-          case "es":
-            text = "Language: Español selected.";
-            break;
-          case "de":
-            text = "Language: Deutsch selected.";
-            break;
-          case "fr":
-            text = "Language: Français selected.";
-            break;
-          case "pt":
-            text = "Language: Português selected.";
-            break;
-          case "ru":
-            text = "Language: Русский selected.";
-            break;
-          case "auto":
-          default:
-            text =
-              "Language: Auto — NOVA follows your browser / IP language settings.";
-            break;
-        }
-        if (langPill) {
-          langPill.textContent = text;
-        }
-      }
-    })();
-  </script>
-<script>
-// NOVA Dynamic Fee Engine
-(function () {
-    const feeBox = document.getElementById("nova-fee");
-    if (!feeBox) return;
-
-    function randomFee(min, max) {
-        return (Math.random() * (max - min) + min).toFixed(3);
-    }
-
-    function updateFee() {
-        const base = 0.010; // 기본 수수료
-        const load = randomFee(0.000, 0.005); // 추가 수수료 (시스템 부하)
-        const finalFee = (base + parseFloat(load)).toFixed(3);
-
-        feeBox.textContent = `${finalFee} NOVA`;
-    }
-
-    updateFee();
-    setInterval(updateFee, 10000); // 10초마다 업데이트
-})();
-</script>
-
-
-
-</body>
-</html>
-
-
-
